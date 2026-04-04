@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Invila™ | Sovereign Industrial Water Infrastructure</title>
+    
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Noto+Serif:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        royalBlue: '#2563eb', ink: '#05070a', surface: '#f8fafc',
+                        mckNavy: '#001b44', invilaGold: '#C5A059', deepInk: '#060b14',
+                        successGreen: '#10B981', surfaceNavy: '#0c1322', legacyRed: '#e11d48', inputBg: '#151b2b'
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100dvh; scroll-behavior: smooth; }
+        #odometer { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+        .hidden-element { display: none !important; }
+        .bg-hero { background-image: url('air.jpg'); background-size: cover; background-position: center; background-attachment: scroll; }
+        @media (min-width: 1024px) { .bg-hero { background-attachment: fixed; } }
+        #contentOverlay { transition: opacity 1s ease-in-out; }
+        .noto-serif { font-family: 'Noto Serif', serif; }
+        
+        /* Smooth Scroll Fade-In Elements */
+        .fade-in-section { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; will-change: opacity, transform; }
+        .fade-in-section.is-visible { opacity: 1; transform: none; }
+
+        .scroller { max-width: 100%; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent); }
+        .scroller__inner { display: flex; width: max-content; flex-wrap: nowrap; gap: 5rem; animation: scroll 40s linear infinite; }
+        .scroller:hover .scroller__inner { animation-play-state: paused; }
+        .client-logo-scroll { filter: grayscale(100%); opacity: 0.4; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; object-fit: contain; }
+        .client-logo-scroll:hover { filter: grayscale(0%); opacity: 1; transform: scale(1.05); }
+        @keyframes scroll { to { transform: translateX(-50%); } }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .pdf-stage { position: absolute; left: -9999px; top: 0; z-index: -50; opacity: 0; pointer-events: none; }
+        .pdf-page { width: 210mm; height: 297mm; padding: 20mm; background: white; color: #00205B; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    </style>
+</head>
+<body class="antialiased text-black">
+
+    <nav class="fixed top-0 w-full z-[100] backdrop-blur-md border-b border-black/5 bg-white/80 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 h-24 md:h-36 flex items-center justify-between">
+            <div class="flex items-center gap-2 md:gap-5">
+                <img src="logo-invila-white.png" alt="Invila" class="h-10 md:h-20 object-contain drop-shadow-sm">
+                <div class="flex flex-col leading-none">
+                    <h1 class="text-[20px] md:text-[55px] font-black text-black uppercase tracking-tighter noto-serif">
+                        INVILA<sup class="text-[10px] md:text-[24px] uppercase font-bold">tm</sup>
+                    </h1>
+                    <p class="text-[9px] md:text-[30px] font-bold text-royalBlue noto-serif whitespace-nowrap">
+                        WATER AS A SERVICE <span class="font-light italic text-black/30 px-0.5">by</span> ZERO CapEX
+                    </p>
+                </div>
+            </div>
+            <a href="#strategic-engine" class="bg-royalBlue text-white px-5 md:px-10 py-2.5 md:py-4 rounded-full text-[9px] md:text-sm font-black uppercase tracking-widest shadow-md hover:scale-105 hover:bg-mckNavy active:scale-95 transition-all">
+                Site Audit
+            </a>
+        </div>
+    </nav>
+
+    <section class="relative min-h-[100dvh] w-full flex flex-col justify-center items-center pt-32 md:pt-48 pb-16 px-6 overflow-hidden bg-white">
+        <video id="heroVideo" muted playsinline preload="auto" class="absolute inset-0 z-10 w-full h-full object-cover">
+            <source src="landingpage_front_optimized.mp4" type="video/mp4">
+        </video>
+        <div id="heroImage" class="absolute inset-0 z-10 hidden bg-hero opacity-30">
+            <div class="absolute inset-0 bg-white/60"></div>
+        </div>
+
+        <div id="contentOverlay" class="relative z-40 text-center w-full max-w-6xl hidden opacity-0">
+            
+            <p class="font-black tracking-[0.3em] uppercase text-[9px] md:text-xs mb-4">
+                <span class="text-black">Annual</span> <span class="text-royalBlue">Verified Performance</span>
+            </p>
+            
+            <div class="mb-10 md:mb-14">
+                <span id="odometer" class="text-5xl md:text-[10rem] font-black leading-none text-black">79.150.000</span>
+                <span class="text-2xl md:text-5xl font-light text-royalBlue ml-1 italic lowercase">m³</span>
+                
+                <p class="text-[10px] md:text-sm font-bold text-black/50 tracking-[0.15em] md:tracking-widest uppercase mt-4">
+                    Across Industrial, Municipal & Food Processing Facilities since 2006
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto mb-16 md:mb-24 text-center">
+                <p class="text-xl md:text-4xl font-light leading-snug text-black/90">
+                    Bukan sekadar volume, ini adalah <strong class="font-black border-b-4 border-royalBlue">akumulasi risiko yang berhasil kami mitigasi</strong> selama dua dekade operasional. Sejak 2006, Invila™ telah menjadi mesin tak terlihat di balik operasional kepentingan publik dan berbagai industri di Indonesia. Hari ini, kami mengubah skala otoritas ini menjadi perisai finansial untuk EBITDA Anda.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 text-left border-t border-black/10 pt-12 mb-20 md:mb-32">
+                <div class="space-y-3">
+                    <h4 class="font-black text-royalBlue uppercase text-xs md:text-xl tracking-widest noto-serif">Financial</h4>
+                    <p class="text-sm md:text-lg leading-relaxed text-black/80 font-medium"><strong class="text-black">Zero Capex Model.</strong> 100% Off-Balance Sheet.</p>
+                </div>
+                <div class="space-y-3 md:border-l-2 md:border-black/5 md:pl-10">
+                    <h4 class="font-black text-royalBlue uppercase text-xs md:text-xl tracking-widest noto-serif">Operational</h4>
+                    <p class="text-sm md:text-lg leading-relaxed text-black/80 font-medium"><strong class="text-black">99.98% Uptime.</strong> Mengamankan kontinuitas air industri.</p>
+                </div>
+                <div class="space-y-3 md:border-l-2 md:border-black/5 md:pl-10">
+                    <h4 class="font-black text-royalBlue uppercase text-xs md:text-xl tracking-widest noto-serif">Compliance</h4>
+                    <p class="text-sm md:text-lg leading-relaxed text-black/80 font-medium"><strong class="text-black">Risk Transfer.</strong> Kami mengambil alih liabilitas regulasi.</p>
+                </div>
+            </div>
+
+            <div id="ebitda-anchor" class="border-t-4 border-black pt-12 text-left w-full">
+                <div class="max-w-4xl">
+                    <h3 class="text-2xl md:text-6xl font-black tracking-tight text-black leading-[1.1] mb-8 noto-serif">Protecting your <span class="text-royalBlue">EBITDA</span> is our standard.</h3>
+                    <p class="text-base md:text-2xl text-black/60 font-light max-w-2xl leading-relaxed mb-10">Bisnis Anda tumbuh tanpa hambatan <strong class="text-black/80">infrastruktur air bersih.</strong></p>
+                    <a href="https://invilawatertreatment-blip.github.io/akumulasi-kapasitas-terpasang-dan-Logo-klien/" target="_blank" rel="noopener noreferrer" class="inline-block border-2 border-black text-black px-8 md:px-12 py-3 md:py-4 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all">View Strategic Portfolio →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white py-20 border-t border-black/5 overflow-hidden fade-in-section">
+        <div class="scroller">
+            <div class="scroller__inner">
+                <img src="asasta%20legong.png" alt="Asasta" class="client-logo-scroll h-8 md:h-14">
+                <img src="dinkes%20depok.png" alt="Dinkes" class="client-logo-scroll h-8 md:h-14">
+                <img src="kievit.png" alt="Kievit" class="client-logo-scroll h-8 md:h-14">
+                <img src="kiw.png" alt="KIW" class="client-logo-scroll h-8 md:h-14">
+                <img src="patria-maritim-perkasa.png" alt="Patria" class="client-logo-scroll h-8 md:h-14">
+                <img src="petrokimia-gresik.png" alt="Petrokimia" class="client-logo-scroll h-8 md:h-14">
+                <img src="tirtanadi.png" alt="Tirtanadi" class="client-logo-scroll h-8 md:h-14">
+                <img src="united-tractors.png" alt="UT" class="client-logo-scroll h-8 md:h-14">
+                <img src="wika.png" alt="Wika" class="client-logo-scroll h-8 md:h-14">
+                <img src="asasta%20legong.png" alt="Asasta" class="client-logo-scroll h-8 md:h-14">
+                <img src="dinkes%20depok.png" alt="Dinkes" class="client-logo-scroll h-8 md:h-14">
+                <img src="kievit.png" alt="Kievit" class="client-logo-scroll h-8 md:h-14">
+                <img src="kiw.png" alt="KIW" class="client-logo-scroll h-8 md:h-14">
+                <img src="patria-maritim-perkasa.png" alt="Patria" class="client-logo-scroll h-8 md:h-14">
+                <img src="petrokimia-gresik.png" alt="Petrokimia" class="client-logo-scroll h-8 md:h-14">
+                <img src="tirtanadi.png" alt="Tirtanadi" class="client-logo-scroll h-8 md:h-14">
+                <img src="united-tractors.png" alt="UT" class="client-logo-scroll h-8 md:h-14">
+                <img src="wika.png" alt="Wika" class="client-logo-scroll h-8 md:h-14">
+            </div>
+        </div>
+    </section>
+
+    <section class="relative w-full h-[60vh] md:h-[80vh] bg-white overflow-hidden flex items-center justify-center fade-in-section">
+        <video id="proofVideo" autoplay loop muted playsinline preload="metadata" class="absolute inset-0 w-full h-full object-cover">
+            <source src="kiw1.mp4" type="video/mp4">
+        </video>
+        <div id="proofText" class="relative z-10 text-center px-6 max-w-5xl opacity-0" style="transition: opacity 5s ease-in-out;">
+            <h4 class="text-invilaGold font-black tracking-[0.4em] uppercase text-[10px] md:text-xs mb-4 drop-shadow-md">Physical Infrastructure Proof</h4>
+            <h3 class="text-3xl md:text-6xl font-black text-black noto-serif mb-6 leading-tight drop-shadow-md">
+                Real Infrastructure.<br><span class="text-black/80">Real Industrial Results.</span>
+            </h3>
+            <div class="w-20 h-1 bg-invilaGold mx-auto mb-6 shadow-md"></div>
+            <p class="text-black/90 text-base md:text-xl font-light leading-relaxed max-w-3xl mx-auto font-medium">
+                Membangun kedaulatan air industri bukan sekadar narasi simulasi. Ini adalah eksekusi skala presisi dan realitas operasional berat yang tim kami bangun serta kelola setiap hari.
+            </p>
+        </div>
+    </section>
+
+    <section id="audit-section" class="bg-white pt-24 pb-12 md:pt-40 md:pb-20 fade-in-section">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="max-w-5xl mb-20 md:mb-32">
+                <h4 class="text-royalBlue font-black tracking-[0.4em] uppercase text-[10px] md:text-xs mb-6">Strategic Diagnostic Audit</h4>
+                <h2 class="text-4xl md:text-7xl font-black text-black noto-serif leading-[1.1] tracking-tight">Tiga Titik Kritis <br> Kebocoran <span class="text-royalBlue">EBITDA</span> Anda.</h2>
+                <div class="mt-8 flex items-center gap-4"><span class="h-px w-12 bg-black/20"></span><p class="text-lg md:text-2xl text-black/40 font-light italic">Analisis MECE: Mengisolasi risiko secara eksklusif.</p></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+                <div class="group flex flex-col justify-between border-t-2 border-black/5 pt-10 hover:border-royalBlue transition-all duration-700">
+                    <div>
+                        <div class="flex items-center justify-between mb-12"><span class="text-royalBlue font-black text-5xl opacity-20 group-hover:opacity-100 transition-opacity">01</span><span class="text-[9px] font-black uppercase tracking-widest border border-black/10 px-3 py-1 text-red-600 bg-red-50">License Risk</span></div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-6 uppercase tracking-tighter noto-serif">Regulatory Compliance</h3>
+                        <p class="text-black/50 text-lg md:text-xl font-light leading-relaxed mb-12">
+                            Risiko Operasional terhadap kebijakan pembatasan kuota ABT memaksa pabrik mengalihkan beban ke PDAM yang memprioritaskan masyarakat—<strong class="text-black/80 font-bold">memicu Eskalasi Risiko Legalitas.</strong>
+                        </p>
+                    </div>
+                    <div class="bg-white border border-black/5 p-6 rounded-lg group-hover:bg-royalBlue/5 transition-colors shadow-sm"><p class="text-royalBlue font-black text-[10px] uppercase tracking-widest mb-2">Invila Value Prop:</p><p class="text-black font-semibold text-base leading-tight">Total Risk Transfer. Kami mengamankan legalitas sumber air sebagai aset strategis Anda.</p></div>
+                </div>
+
+                <div class="group flex flex-col justify-between border-t-2 border-black/5 pt-10 hover:border-royalBlue transition-all duration-700">
+                    <div>
+                        <div class="flex items-center justify-between mb-12"><span class="text-royalBlue font-black text-5xl opacity-20 group-hover:opacity-100 transition-opacity">02</span><span class="text-[9px] font-black uppercase tracking-widest border border-black/10 px-3 py-1 text-orange-600 bg-orange-50">Profit Leak</span></div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-6 uppercase tracking-tighter noto-serif">OPEX Explosion</h3>
+                        <p class="text-black/50 text-lg md:text-xl font-light leading-relaxed mb-12">Transisi paksa ke <strong class="text-black/80 font-bold">Tarif PDAM Industri mencapai 300%</strong> lebih tinggi dari RT. Ketidakpastian biaya yang secara masif memangkas laba bersih kuartalan Anda.</p>
+                    </div>
+                    <div class="bg-white border border-black/5 p-6 rounded-lg group-hover:bg-royalBlue/5 transition-colors shadow-sm"><p class="text-royalBlue font-black text-[10px] uppercase tracking-widest mb-2">Invila Value Prop:</p><p class="text-black font-semibold text-base leading-tight">Single-Rate Guarantee. Satu harga tetap industrial-grade tanpa kejutan tagihan bulanan.</p></div>
+                </div>
+
+                <div class="group flex flex-col justify-between border-t-2 border-black/5 pt-10 hover:border-royalBlue transition-all duration-700">
+                    <div>
+                        <div class="flex items-center justify-between mb-12"><span class="text-royalBlue font-black text-5xl opacity-20 group-hover:opacity-100 transition-opacity">03</span><span class="text-[9px] font-black uppercase tracking-widest border border-black/10 px-3 py-1 text-blue-600 bg-blue-50">Balance Sheet</span></div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-6 uppercase tracking-tighter noto-serif">ROI & Capital</h3>
+                        <p class="text-black/50 text-lg md:text-xl font-light leading-relaxed mb-12">Modal kerja terkunci pada aset non-core yang menyusut nilainya. Liabilitas infrastruktur yang menghambat <strong class="text-black/80 font-bold">fleksibilitas ekspansi</strong> bisnis inti.</p>
+                    </div>
+                    <div class="bg-white border border-black/5 p-6 rounded-lg group-hover:bg-royalBlue/5 transition-colors shadow-sm"><p class="text-royalBlue font-black text-[10px] uppercase tracking-widest mb-2">Invila Value Prop:</p><p class="text-black font-semibold text-base leading-tight">Zero Investment Model. CAPEX menjadi efisiensi operasional murni (Off-Balance Sheet).</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="technology-ecosystem" class="bg-white pt-24 pb-20 px-6 relative overflow-hidden fade-in-section border-t border-black/5">
+        <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#2563eb 1px, transparent 1px), linear-gradient(90deg, #2563eb 1px, transparent 1px); background-size: 40px 40px;"></div>
+        
+        <div class="max-w-5xl mx-auto relative z-10">
+            <h4 class="text-invilaGold font-black tracking-[0.4em] uppercase text-[10px] md:text-xs mb-4 drop-shadow-sm">Invila™ Technology Ecosystem</h4>
+            <h2 class="text-4xl md:text-6xl font-black text-black noto-serif leading-[1.1] tracking-tight mb-8">
+                Mengubah Liabilitas Menjadi <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-invilaGold to-yellow-600">Air Proses Presisi</span> Secara Autopilot.
+            </h2>
+            
+            <p class="text-lg md:text-2xl text-black/70 font-light leading-relaxed max-w-4xl border-l-2 border-invilaGold pl-6 mb-16 relative">
+                Ekosistem ini mengintegrasikan rekayasa proses tingkat lanjut dengan kecerdasan buatan (AI) untuk mengeliminasi ketidakstabilan kualitas air baku dan melindungi aset mesin produksi Anda secara absolut.
+            </p>
+        </div>
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 relative z-10">
+            <div class="group bg-white p-8 md:p-10 rounded-[2rem] border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <span class="text-legacyRed font-black text-5xl opacity-20 transition-opacity absolute top-8 right-8">01</span>
+                
+                <h3 class="text-[10px] font-black text-legacyRed uppercase tracking-[0.3em] mb-2">The Bio-Shield (Pre-Oxidation)</h3>
+                <h4 class="text-xl md:text-2xl font-black text-mckNavy mb-6 noto-serif">Menetralisir Toksisitas Secara Presisi.</h4>
+                
+                <ul class="space-y-4 text-sm text-black/70 leading-relaxed font-light">
+                    <li class="flex items-start gap-3"><span class="text-legacyRed font-black mt-0.5">▪</span> <div><strong class="text-black">Oxy-Pure™ System:</strong> Memecah rantai karbon kompleks (Non-Bio COD) menjadi molekul 100% <i>biodegradable</i>. Residu reaksi dimanfaatkan kembali sebagai koagulan alami secara <i>in-situ</i>.</div></li>
+                    <li class="flex items-start gap-3"><span class="text-legacyRed font-black mt-0.5">▪</span> <div><strong class="text-black">Invila™ Hybrid Lamella Clarifier-DECM:</strong> Teknologi andalan yang telah teruji efisiensinya selama 20 tahun. Mengendapkan padatan pasca-oksidasi dengan kecepatan tinggi, menghasilkan pemisahan paling efisien di Indonesia dengan jejak lahan (<i>small footprint</i>) minimal.</div></li>
+                </ul>
+                <div class="mt-8 pt-4 border-t border-black/10">
+                    <p class="text-xs font-bold text-mckNavy"><span class="text-[9px] uppercase tracking-widest text-black/40 block mb-1">Impact Result</span>Beban COD anjlok signifikan sebelum memasuki tahap biologi.</p>
+                </div>
+            </div>
+
+            <div class="group bg-white p-8 md:p-10 rounded-[2rem] border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <span class="text-successGreen font-black text-5xl opacity-20 transition-opacity absolute top-8 right-8">02</span>
+                
+                <h3 class="text-[10px] font-black text-successGreen uppercase tracking-[0.3em] mb-2">Core MBBR Bio-Engine</h3>
+                <h4 class="text-xl md:text-2xl font-black text-mckNavy mb-6 noto-serif">Dapur Pacu Biologi Anti-Shock Loading.</h4>
+                
+                <ul class="space-y-4 text-sm text-black/70 leading-relaxed font-light">
+                    <li class="flex items-start gap-3"><span class="text-successGreen font-black mt-0.5">▪</span> <div><strong class="text-black">Dynamic Biofilm:</strong> Menggunakan media MBBR untuk resiliensi operasional. Ekosistem bakteri "berpesta" optimal mengurai materi organik, karena <i>effluent</i> dari tahap Oxy-Pure™ telah terkonversi penuh menjadi Bio-COD yang mudah dicerna.</div></li>
+                    <li class="flex items-start gap-3"><span class="text-successGreen font-black mt-0.5">▪</span> <div><strong class="text-black">Post-MBBR Lamella Clarifier-DECM:</strong> Menggantikan fungsi <i>clarifier</i> konvensional. Memisahkan biomassa berkecepatan tinggi dengan mengunci <i>consumable cost</i> di titik terendah dibanding seluruh teknologi kompetitor.</div></li>
+                    <li class="flex items-start gap-3"><span class="text-successGreen font-black mt-0.5">▪</span> <div><strong class="text-black">Automated Sludge Control:</strong> Manajemen RAS/WAS otomatis ke <i>Decanter</i> guna meminimalkan volume limbah padat.</div></li>
+                </ul>
+                <div class="mt-8 pt-4 border-t border-black/10">
+                    <p class="text-xs font-bold text-mckNavy"><span class="text-[9px] uppercase tracking-widest text-black/40 block mb-1">Impact Result</span>Degradasi organik kontinyu tanpa risiko <i>biomass wash-out</i>.</p>
+                </div>
+            </div>
+
+            <div class="group bg-white p-8 md:p-10 rounded-[2rem] border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <span class="text-royalBlue font-black text-5xl opacity-20 transition-opacity absolute top-8 right-8">03</span>
+                
+                <h3 class="text-[10px] font-black text-royalBlue uppercase tracking-[0.3em] mb-2">The Guardian (RO Shield & Polishing)</h3>
+                <h4 class="text-xl md:text-2xl font-black text-mckNavy mb-6 noto-serif">Proteksi Berlapis untuk Unit Membran.</h4>
+                
+                <ul class="space-y-4 text-sm text-black/70 leading-relaxed font-light">
+                    <li class="flex items-start gap-3"><span class="text-royalBlue font-black mt-0.5">▪</span> <div><strong class="text-black">Smart GSF:</strong> Desain tanpa pasir silika konvensional, menggunakan media <i>floating gravel</i> setinggi 1/5 dari dasar lantai.</div></li>
+                    <li class="flex items-start gap-3"><span class="text-royalBlue font-black mt-0.5">▪</span> <div><strong class="text-black">Zero-Chlorine:</strong> Memastikan netralisasi sisa oksidator sebelum mencapai tahap filtrasi tingkat lanjut.</div></li>
+                </ul>
+                <div class="mt-8 pt-4 border-t border-black/10">
+                    <p class="text-xs font-bold text-mckNavy"><span class="text-[9px] uppercase tracking-widest text-black/40 block mb-1">Impact Result</span>Turbiditas < 0.2 NTU dan SDI < 3. Memperpanjang umur pakai membran RO secara signifikan.</p>
+                </div>
+            </div>
+
+            <div class="group bg-white p-8 md:p-10 rounded-[2rem] border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <span class="text-invilaGold font-black text-5xl opacity-20 transition-opacity absolute top-8 right-8">04</span>
+                
+                <h3 class="text-[10px] font-black text-invilaGold uppercase tracking-[0.3em] mb-2">Advanced Reclamation</h3>
+                <h4 class="text-xl md:text-2xl font-black text-mckNavy mb-6 noto-serif">Penciptaan Aset: Pemurnian Molekuler.</h4>
+                
+                <ul class="space-y-4 text-sm text-black/70 leading-relaxed font-light">
+                    <li class="flex items-start gap-3"><span class="text-invilaGold font-black mt-0.5">▪</span> <div><strong class="text-black">Reverse Osmosis (RO):</strong> Pemisahan TDS dan mineral terlarut secara presisi hingga tingkat molekuler.</div></li>
+                    <li class="flex items-start gap-3"><span class="text-invilaGold font-black mt-0.5">▪</span> <div><strong class="text-black">Industrial-Grade:</strong> Menghasilkan <i>Product Water</i> konsisten yang terukur sesuai standar kebutuhan pabrik.</div></li>
+                </ul>
+                <div class="mt-8 pt-4 border-t border-black/10">
+                    <p class="text-xs font-bold text-mckNavy"><span class="text-[9px] uppercase tracking-widest text-black/40 block mb-1">Impact Result</span>TDS < 50 mg/L. Optimal untuk Boiler, Cooling Tower, & lini produksi sensitif.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-6xl mx-auto mt-16 bg-white p-8 md:p-12 rounded-[2rem] border border-black/10 relative z-10 shadow-lg">
+            <h4 class="text-invilaGold font-black tracking-[0.3em] uppercase text-[10px] md:text-xs mb-4">Intelligence Layer: SCADA-IoT & AI</h4>
+            <h3 class="text-2xl md:text-4xl font-black text-black noto-serif tracking-tight mb-8">Otomatisasi Berbasis Kepastian Data.</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-black/70 text-sm md:text-base font-light leading-relaxed">
+                <div>
+                    <strong class="text-black block mb-2 font-bold text-lg">1. Hardware Health Monitoring</strong>
+                    Sistem mengawasi amperase pompa, tekanan pipa, dan status motor secara <i>real-time</i>. Memungkinkan penerapan <i>Predictive Maintenance</i> dengan memberikan peringatan dini sebelum kerusakan mekanis terjadi.
+                </div>
+                <div>
+                    <strong class="text-black block mb-2 font-bold text-lg">2. Process Intelligence</strong>
+                    Algoritma "Stability Corridor" beroperasi untuk menyesuaikan dosis kimia dan laju filtrasi secara otomatis sebagai respon instan terhadap fluktuasi (<i>spike</i>) polutan pada <i>influent</i>.
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-black/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div class="lg:col-span-5">
+                    <h4 class="text-xl font-black text-black noto-serif mb-3">Mekanisme Self-Cleaning: Smart GSF</h4>
+                    <p class="text-sm text-black/60 font-light leading-relaxed mb-4">Menekan risiko kelalaian operasional dan mengeliminasi kebutuhan intervensi manual yang tidak terprediksi untuk menjaga ketersediaan air (Water Availability) pada level 99.9%.</p>
+                </div>
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-black/5">
+                        <strong class="text-black text-sm block mb-1">Trigger Dual-Logic</strong>
+                        <p class="text-xs text-black/60 font-light">Sistem terpicu berdasarkan <i>Differential Pressure</i> (ΔP > 1.5 Bar) atau <i>Smart Timer</i> berkala.</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-black/5">
+                        <strong class="text-black text-sm block mb-1">Air-Scouring System</strong>
+                        <p class="text-xs text-black/60 font-light">Injeksi udara tekanan tinggi mengocok media, melepaskan partikel yang terjebak secara menyeluruh sebelum pembilasan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="strategic-engine" class="bg-white border-t border-black/5 py-16 md:py-24 px-4 flex justify-center items-center fade-in-section">
+        <div class="w-full max-w-md bg-surfaceNavy border border-slate-800 rounded-[2rem] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative flex flex-col justify-between">
+            
+            <div>
+                <div class="text-center mb-4">
+                    <h1 class="text-white text-2xl font-black tracking-tight uppercase drop-shadow-md">INVILA™ <span class="text-invilaGold">SAVINGS CALCULATOR</span></h1>
+                    <p class="text-invilaGold/80 font-bold tracking-[0.2em] text-[9px] uppercase mt-1">Liquidity & EBITDA Analytics</p>
+                </div>
+
+                <div class="border-l-2 border-invilaGold pl-3 py-1 mb-4">
+                    <p class="text-[10px] text-white/90 leading-tight font-medium">
+                        "Input Req Kebutuhan Air Bersih Anda dan Tarif PDAM (m³)."
+                    </p>
+                </div>
+
+                <div class="space-y-3 mb-4">
+                    <div class="bg-inputBg p-3 rounded-xl border border-slate-700 focus-within:border-invilaGold transition-colors">
+                        <label class="block text-[9px] font-bold text-invilaGold/80 uppercase mb-1 tracking-wider">Requirement (m³/day)</label>
+                        <input type="number" id="flow" value="1500" oninput="updateCalculations()" class="w-full bg-transparent text-white font-black text-xl outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-inputBg p-3 rounded-xl border border-slate-700 focus-within:border-invilaGold transition-colors">
+                            <label class="block text-[9px] font-bold text-invilaGold/80 uppercase mb-1 tracking-wider">PDAM / Legacy Cost</label>
+                            <input type="number" id="legacy" value="14600" oninput="updateCalculations()" class="w-full bg-transparent text-white font-black text-xl outline-none">
+                        </div>
+                        <div class="bg-mckNavy p-3 rounded-xl border border-invilaGold/50 focus-within:border-invilaGold transition-colors relative">
+                            <label class="block text-[9px] font-bold text-invilaGold uppercase mb-1 tracking-wider">Invila Tariff (Rp)</label>
+                            <input type="number" id="tariff" value="5500" oninput="updateCalculations()" class="w-full bg-transparent text-invilaGold font-black text-xl outline-none">
+                            <p class="text-[5px] text-white/60 italic absolute bottom-1 right-2">*Finalized after assessment</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-mckNavy p-5 rounded-2xl border border-slate-700 text-center mb-4 shadow-inner">
+                    <p class="text-invilaGold text-[10px] font-black uppercase tracking-[0.2em] mb-1">5-Year Value Recovery</p>
+                    <h2 id="dash-5year" class="text-4xl font-black text-white tracking-tighter drop-shadow-lg py-1">Rp 0</h2>
+                    <div class="mt-3 pt-3 border-t border-white/10 flex justify-between items-center">
+                        <div class="text-left">
+                            <p class="text-[8px] text-white/60 uppercase tracking-widest">CapEx Offset</p>
+                            <p id="dash-capex" class="text-xs font-bold text-white">Rp 0</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] text-white/60 uppercase tracking-widest">Annual EBITDA Gain</p>
+                            <p id="dash-annual" class="text-xs font-bold text-successGreen">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="generateStrategicPDF()" id="btn-pdf" class="w-full bg-invilaGold text-deepInk py-4 rounded-xl font-black uppercase tracking-[0.2em] text-xs shadow-lg hover:bg-white active:scale-95 transition-all">
+                    Download Saving Report
+                </button>
+            </div>
+
+            <div class="text-center pt-6">
+                <p class="text-[10px] font-bold text-white uppercase tracking-widest drop-shadow-md">Irfon Desman, SE. MBA.</p>
+                <p class="text-[8px] text-invilaGold uppercase tracking-widest mt-1">Strategic and Marketing Manager</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="transparency-framework" class="bg-white py-24 md:py-32 px-6 border-t border-black/5 relative overflow-hidden fade-in-section">
+        
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-slate-50 to-transparent pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="max-w-4xl mx-auto text-center mb-20 md:mb-28">
+                <h4 class="text-royalBlue font-black tracking-[0.4em] uppercase text-[10px] md:text-xs mb-6">Strategic Transparency</h4>
+                <h2 class="text-4xl md:text-6xl font-black text-black noto-serif leading-[1.1] tracking-tight mb-8">Terlalu Bagus Untuk <br><span class="text-royalBlue">Menjadi Kenyataan?</span></h2>
+                <p class="text-lg md:text-2xl text-black/60 font-light leading-relaxed">Mari kita bedah anatomi kontrak <strong class="text-black font-black italic">Invila™ WaaS</strong>. <br>Tanpa asterisk, tanpa biaya tersembunyi.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
+                
+                <div class="space-y-12">
+                    <div class="border-b-2 border-black/10 pb-5 mb-10">
+                        <h3 class="text-2xl md:text-3xl font-black text-mckNavy uppercase tracking-tighter noto-serif">Financial Clarity</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-invilaGold uppercase tracking-[0.3em] mt-2">Executive / Board of Directors</p>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-invilaGold transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Di mana letak keuntungan Invila jika 100% Zero CapEx?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-invilaGold uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p>Model bisnis kami bukan jual-beli alat. Kami adalah investor infrastruktur. Margin kami murni didapat dari efisiensi operasional dan selisih tarif air yang disepakati. Jika sistem kami tidak efisien, <strong class="text-black font-black">Invila yang rugi, bukan Anda.</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-invilaGold transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Bagaimana dengan eskalasi tarif di masa depan?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-invilaGold uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p><strong class="text-black font-black">Single-Rate Guarantee.</strong> Kontrak kami mengunci tarif air industri (Rp/m³) Anda dari kejutan fluktuasi harga PDAM atau kenaikan tarif dasar listrik. Prediktabilitas <i class="font-medium">cash flow</i> Anda adalah prioritas absolut kami.</p>
+                        </div>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-invilaGold transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Apa yang terjadi di akhir masa kontrak?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-invilaGold uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p><strong class="text-black font-black">Transfer of Asset (B.O.T).</strong> Di akhir masa kontrak <strong class="text-black font-black border-b-2 border-invilaGold">15 tahun</strong> atau pencapaian Akumulasi Volume, seluruh infrastruktur <i>Water Treatment</i> bernilai miliaran Rupiah tersebut akan dihibahkan (100% Handover) menjadi aset properti sah milik pabrik Anda, dalam kondisi operasional prima.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-12">
+                    <div class="border-b-2 border-black/10 pb-5 mb-10">
+                        <h3 class="text-2xl md:text-3xl font-black text-mckNavy uppercase tracking-tighter noto-serif">Operational Security</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-royalBlue uppercase tracking-[0.3em] mt-2">Plant / Factory Manager</p>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-royalBlue transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Apakah proses instalasi akan membuat pabrik Shutdown?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-royalBlue uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p><strong class="text-black font-black">Zero-Downtime Integration.</strong> Kami mendesain sistem secara modular dan membangun jalur <i>bypass</i> paralel. Pabrik Anda tetap beroperasi 100% normal selama masa transisi ke ekosistem Invila™.</p>
+                        </div>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-royalBlue transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Bagaimana jika kualitas air limbah kami sangat ekstrem?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-royalBlue uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p>Kami menolak solusi "Satu Untuk Semua". Sebelum kontrak ditandatangani, tim <i>Engineering</i> kami mengeksekusi Site Audit & Uji Laboratorium mendalam untuk merancang <strong class="text-black font-black">sistem spesifik (Custom DED)</strong> yang kebal terhadap anomali parameter pabrik Anda.</p>
+                        </div>
+                    </div>
+
+                    <div class="group relative pl-6 md:pl-8 border-l-4 border-black/10 hover:border-royalBlue transition-colors duration-500">
+                        <h4 class="text-lg md:text-xl font-black text-black mb-4 leading-snug">"Bagaimana jika terjadi kerusakan mesin di tengah malam?"</h4>
+                        <div class="text-base text-black/70 leading-relaxed font-light">
+                            <strong class="font-black text-royalBlue uppercase text-[9px] tracking-[0.2em] block mb-2">The Reality</strong>
+                            <p><strong class="text-black font-black">SLA 99.98% Uptime.</strong> Invila™ digerakkan oleh sistem <i>Smart SCADA & IoT</i> yang dipantau 24/7. Tim <i>Rapid Response</i> kami akan mengisolasi masalah sebelum jadwal produksi Anda berkedip. Perawatan? Sepenuhnya tanggungan kami.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="mt-20 md:mt-32 text-center border-t border-black/10 pt-16">
+                 <p class="text-xl md:text-3xl font-light text-black/80 leading-snug noto-serif mb-8">Keraguan Anda adalah bagian dari proses mitigasi risiko kami.<br><strong class="font-black text-black">Uji ketahanan argumen kami di meja rapat Anda.</strong></p>
+                 <a href="#exclusivity-clause" class="inline-flex items-center gap-4 bg-white border border-black text-black px-8 md:px-12 py-4 md:py-5 rounded-full text-[10px] md:text-sm font-black uppercase tracking-[0.2em] shadow-lg hover:bg-black hover:text-white hover:scale-105 active:scale-95 transition-all">Jadwalkan Eksekusi Audit →</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="exclusivity-clause" class="bg-white py-20 md:py-32 px-6 border-t border-black/10 relative overflow-hidden fade-in-section">
+        
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-invilaGold/5 blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="border border-black/10 bg-white p-8 md:p-16 rounded-3xl text-center shadow-[0_10px_40px_rgba(0,0,0,0.05)]">
+                
+                <div class="inline-flex items-center gap-3 bg-legacyRed/10 border border-legacyRed/20 text-legacyRed px-4 py-2 rounded-full mb-8">
+                    <span class="w-2 h-2 rounded-full bg-legacyRed animate-pulse"></span>
+                    <span class="text-[10px] md:text-xs font-black uppercase tracking-widest text-legacyRed">Kapasitas Eksekusi Terbatas</span>
+                </div>
+
+                <h2 class="text-3xl md:text-5xl font-black text-black noto-serif leading-[1.1] tracking-tight mb-8">
+                    Hanya <span class="text-invilaGold">2 (Dua) Proyek</span> Skala Penuh Kuartal Ini.
+                </h2>
+                
+                <div class="text-base md:text-xl text-black/70 font-light leading-relaxed space-y-6 text-justify md:text-center">
+                    <p>
+                        Kami bukan vendor penyedia mesin massal. Model bisnis 100% <strong class="text-black font-bold italic">Zero-CapEx</strong> berarti <strong class="border-b border-invilaGold text-black">kami menanggung miliaran Rupiah di depan</strong> untuk memitigasi risiko pabrik Anda.
+                    </p>
+                    <p>
+                        Demi menjaga standar kualitas <i class="text-black/50">Zero-Downtime</i> dan fokus <i class="text-black/50">Engineering</i> yang absolut, sumber daya operasional dan pendanaan kami saat ini <strong class="text-black font-black">dikunci secara eksklusif hanya untuk mengeksekusi 2 (dua) proyek WaaS secara bersamaan.</strong>
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-6 md:p-8 rounded-2xl border border-black/5 mt-10 text-left">
+                    <h3 class="text-invilaGold font-black uppercase tracking-[0.2em] text-[10px] md:text-xs mb-4">Mekanisme Alokasi Prioritas (The LOI Gate)</h3>
+                    <p class="text-sm md:text-base text-black/80 font-light leading-relaxed">
+                        Kami tidak merespon antrean standar. Kemitraan strategis ini diprioritaskan ketat berdasarkan penerimaan <strong class="text-black font-bold uppercase">Letter of Intent (LOI)</strong> resmi dari manajemen Anda pasca-audit. 
+                    </p>
+                    <div class="mt-6 pt-6 border-t border-black/10 text-center">
+                        <p class="text-base md:text-lg text-black font-black noto-serif italic">"Amankan kuota audit Anda hari ini, atau saksikan kompetitor Anda menikmati efisiensi EBITDA ini."</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 flex flex-col sm:flex-row justify-center items-center gap-6">
+                    <a href="https://wa.me/6285219493322?text=Selamat%20%5Bpagi%2Fsiang%5D%2C%20Pak%20Irfon%20(Strategic%20Room).%0A%0AMenindaklanjuti%20informasi%20keterbatasan%20kuota%20eksekusi%20Invila%E2%84%A2%20kuartal%20ini%2C%20saya%20bermaksud%20mengamankan%20slot%20prioritas%20*Strategic%20Site%20Audit*%20untuk%20fasilitas%20kami%20terkait%20transisi%20model%20*Zero-CapEx*%20(WaaS).%0A%0ASebagai%20*baseline*%20kualifikasi%2C%20berikut%20data%20kami%3A%0A-%20Nama%3A%20%0A-%20Jabatan%3A%20(CEO%20%2F%20BOD%20%2F%20Plant%20Manager)%0A-%20Perusahaan%3A%20PT.%20%0A-%20Estimasi%20Debit%20(m%C2%B3%2Fhari)%3A%20%0A%0AMohon%20arahannya%20terkait%20prosedur%20penerbitan%20LOI%20(Letter%20of%20Intent)%20dan%20ketersediaan%20waktu%20tim%20*Engineering*%20Bapak%20untuk%20visit%20ke%20lokasi%20kami.%20Terima%20kasih." target="_blank" class="w-full sm:w-auto bg-invilaGold text-white px-10 py-5 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-lg hover:bg-black hover:scale-105 active:scale-95 transition-all text-center">
+                        Kunci Kuota Audit Anda →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-[9px] font-bold text-black/30 uppercase tracking-[0.3em]">Invila™ Strategic Room | strictly confidential</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="final-legacy" class="bg-white pt-28 md:pt-40 pb-12 px-6 relative overflow-hidden fade-in-section border-t border-black/5">
+        
+        <div class="absolute inset-0 opacity-40 pointer-events-none">
+            <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-100 via-transparent to-transparent"></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            
+            <div class="mb-12 flex justify-center">
+                <div class="w-px h-24 bg-gradient-to-b from-transparent via-invilaGold to-transparent"></div>
+            </div>
+
+            <h2 class="text-3xl md:text-6xl font-black text-black noto-serif leading-tight mb-12 tracking-tighter">
+                Jangan Hanya Mengelola Air.<br>
+                <span class="text-invilaGold italic">Kuasai Kedaulatan Infrastruktur Anda.</span>
+            </h2>
+
+            <div class="max-w-3xl mx-auto mb-20">
+                <p class="text-lg md:text-2xl text-black/60 font-light leading-relaxed">
+                    Keputusan yang Anda ambil hari ini bukan sekadar tentang angka di neraca keuangan. Ini adalah tentang memastikan bahwa dalam <strong class="text-black">15 tahun ke depan</strong>, pabrik Anda berdiri di atas fondasi yang mandiri, efisien, dan berdaulat secara teknologi.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left max-w-4xl mx-auto mb-20">
+                <div class="border-l-2 border-black/10 pl-6 py-4">
+                    <p class="text-black/40 text-[10px] uppercase tracking-[0.4em] mb-2 font-black">Masa Depan</p>
+                    <p class="text-black text-lg font-medium">Aset Miliaran Rupiah yang Menanti di Akhir Kontrak.</p>
+                </div>
+                <div class="border-l-2 border-black/10 pl-6 py-4">
+                    <p class="text-black/40 text-[10px] uppercase tracking-[0.4em] mb-2 font-black">Hari Ini</p>
+                    <p class="text-black text-lg font-medium">EBITDA yang Terproteksi dari Kenaikan Tarif PDAM.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center mb-24">
+                 <h1 class="logo-text text-3xl md:text-5xl font-black text-black uppercase tracking-tighter noto-serif">INVILA<sup class="text-[12px] md:text-[18px] uppercase font-bold">tm</sup></h1>
+                 <p class="text-[10px] md:text-xs font-bold text-invilaGold uppercase tracking-[0.6em] mt-2">Protecting The Core of Industry</p>
+            </div>
+
+            <div class="border-t border-black/10 pt-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+                <div class="text-left">
+                    <p class="text-black text-sm font-black mb-1 tracking-wider uppercase">PT. Invila Tirta Nusantara</p>
+                    <p class="text-black/60 text-sm font-light leading-relaxed">
+                        Ruko Sentra Niaga 2, No 5<br>
+                        Harapan Indah, Kota Bekasi 17131 Indonesia
+                    </p>
+                    <p class="text-black/60 text-sm font-light mt-3 border-t border-black/10 pt-2 flex flex-col gap-1">
+                        <span><span class="font-bold text-black/40 uppercase tracking-widest text-[10px] mr-2 inline-block w-12">Phone</span> +62 21 88866168</span>
+                        <span><span class="font-bold text-black/40 uppercase tracking-widest text-[10px] mr-2 inline-block w-12">Email</span> <a href="mailto:invilawatertreatment@gmail.com" class="hover:text-invilaGold transition-colors text-black">invilawatertreatment@gmail.com</a></span>
+                    </p>
+                </div>
+                
+                <div class="text-left md:text-right">
+                    <p class="text-black/40 text-[10px] font-bold uppercase tracking-widest mb-4">© 2026 All Rights Reserved.</p>
+                    <div class="flex gap-6">
+                        <a href="#" class="text-black/50 hover:text-invilaGold text-[10px] font-medium uppercase tracking-widest transition-colors">Privacy Policy</a>
+                        <a href="#" class="text-black/50 hover:text-invilaGold text-[10px] font-medium uppercase tracking-widest transition-colors">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="pdf-stage">
+        
+        <div id="pdf-page-1" class="pdf-page">
+            <div>
+                <div class="flex items-center justify-between pb-4 mb-6 border-b-4 border-[#001b44]">
+                    <div class="flex items-center gap-4 bg-[#001b44] p-3 pr-6 rounded-lg shadow-sm">
+                        <img src="logo-invila-white.png" class="h-10 object-contain drop-shadow-md" alt="Invila Logo">
+                        <div class="flex flex-col gap-0.5 border-l border-white/20 pl-4">
+                            <h1 class="text-[24px] font-black text-white uppercase tracking-tighter noto-serif leading-none mb-0 drop-shadow-sm">
+                                INVILA<sup class="text-[10px] uppercase font-bold text-[#C5A059]">tm</sup>
+                            </h1>
+                            <p class="text-[9px] font-bold text-[#C5A059] noto-serif whitespace-nowrap leading-none mt-0">
+                                WATER AS A SERVICE <span class="font-light italic text-white/50 px-0.5">by</span> ZERO CapEX
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-[#001b44]/60 uppercase tracking-[0.4em]">Confidential Memorandum</p>
+                        <p class="text-[11px] font-black uppercase text-[#001b44] mt-1">REF: 001/INV-SAV/2026</p>
+                    </div>
+                </div>
+
+                <h2 class="text-3xl font-black text-[#001b44] mb-4 uppercase tracking-tight">Value Optimization Report</h2>
+                
+                <p class="text-sm leading-relaxed text-[#001b44]/80 mb-6 border-l-4 border-[#C5A059] pl-4 font-medium text-justify">
+                    "Analisis ini memvalidasi pengalihan risiko infrastruktur ke model <b>Asset-Light (WaaS)</b>. Strategi ini secara instan mengoptimalkan arus kas operasional tanpa pengeluaran modal (CapEx)."
+                </p>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-8">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Basis Data Simulasi</p>
+                    <div class="flex justify-between text-center">
+                        <div class="w-1/3 border-r border-slate-200">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Debit Harian</p>
+                            <p id="pdf-flow" class="text-2xl font-black text-[#001b44]">0</p>
+                        </div>
+                        <div class="w-1/3 border-r border-slate-200">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Biaya Lama</p>
+                            <p id="pdf-legacy" class="text-2xl font-black text-[#001b44]">0</p>
+                        </div>
+                        <div class="w-1/3">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Tarif WaaS</p>
+                            <p id="pdf-tariff" class="text-2xl font-black text-[#001b44]">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-black text-[#001b44] uppercase tracking-widest mb-3">Komparasi Strategis: PDAM vs INVILA WaaS</h3>
+                <div class="rounded-xl overflow-hidden border border-[#001b44]/20 mb-8">
+                    <table class="w-full text-left text-[11px]">
+                        <thead>
+                            <tr class="bg-[#001b44] text-white uppercase tracking-wider">
+                                <th class="p-4 font-bold w-1/3">Parameter Valuasi</th>
+                                <th class="p-4 font-bold border-l border-white/20 w-1/3">Legacy / PDAM</th>
+                                <th class="p-4 font-bold border-l border-white/20 bg-[#C5A059] text-[#001b44] w-1/3">INVILA™ WaaS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-[#001b44]">
+                            <tr class="border-b border-[#001b44]/10 bg-slate-50">
+                                <td class="p-4 font-bold">Pengeluaran Modal (CapEx)</td>
+                                <td class="p-4 border-l border-[#001b44]/10">Beban Perusahaan (Sunk Cost)</td>
+                                <td class="p-4 border-l border-[#001b44]/10 font-black text-[#10B981]">Zero CapEx (Ditanggung Invila)</td>
+                            </tr>
+                            <tr class="border-b border-[#001b44]/10">
+                                <td class="p-4 font-bold">Tarif Dasar Air / m³</td>
+                                <td class="p-4 border-l border-[#001b44]/10" id="tbl-legacy">Rp 0</td>
+                                <td class="p-4 border-l border-[#001b44]/10 font-bold text-[#001b44]" id="tbl-tariff">Rp 0</td>
+                            </tr>
+                            <tr class="border-b border-[#001b44]/10 bg-slate-50">
+                                <td class="p-4 font-bold">Risiko Operasional & Perawatan</td>
+                                <td class="p-4 border-l border-[#001b44]/10">Ditanggung Perusahaan</td>
+                                <td class="p-4 border-l border-[#001b44]/10 font-bold">Dipindahkan 100% ke Invila</td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-bold">Dampak Laba (EBITDA) Tahunan</td>
+                                <td class="p-4 border-l border-[#001b44]/10 italic text-slate-500">Baseline (No Growth)</td>
+                                <td class="p-4 border-l border-[#001b44]/10 font-black text-[#10B981]" id="tbl-gain">Rp 0 (Gain)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-xs font-black text-[#001b44] uppercase tracking-widest mb-3">Strategic Impact Assessment</h3>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="border-2 border-[#001b44]/10 p-5 rounded-2xl bg-slate-50">
+                        <p class="text-[9px] font-bold text-[#001b44]/60 uppercase tracking-widest mb-1">Estimated CapEx Exposure Avoidance</p>
+                        <p id="pdf-capex" class="text-xl font-black text-[#001b44]">Rp 0</p>
+                    </div>
+                    <div class="border-2 border-[#C5A059]/30 bg-[#C5A059]/5 p-5 rounded-2xl">
+                        <p class="text-[9px] font-bold text-[#C5A059] uppercase tracking-widest mb-1">Annual EBITDA Recovery (Savings)</p>
+                        <p id="pdf-annual" class="text-xl font-black text-[#10B981]">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="bg-[#001b44] p-5 rounded-xl text-white flex justify-between items-center">
+                    <p class="font-bold uppercase tracking-widest text-sm">Return on Investment (ROI)</p>
+                    <p class="text-2xl font-black text-[#C5A059] uppercase tracking-widest">Infinite <span class="text-sm font-normal text-white/80">(Zero CapEx)</span></p>
+                </div>
+            </div>
+            
+            <div class="text-center border-t-2 border-[#001b44]/10 pt-4 text-[9px] font-bold text-[#001b44]/40 uppercase tracking-widest">
+                Page 1 of 2 | Invila Strategic Advisory
+            </div>
+        </div>
+
+        <div id="pdf-page-2" class="pdf-page">
+            <div>
+                <div class="flex items-center justify-between border-b-2 border-[#001b44]/20 pb-4 mb-8">
+                    <div class="flex items-center gap-3 bg-[#001b44] p-2 pr-4 rounded-md shadow-sm">
+                        <img src="logo-invila-white.png" class="h-6 object-contain drop-shadow-sm" alt="Invila Logo">
+                        <div class="flex flex-col gap-0 border-l border-white/20 pl-3">
+                            <h2 class="text-[14px] font-black text-white uppercase tracking-tighter noto-serif leading-none mb-0 drop-shadow-sm">
+                                INVILA<sup class="text-[6px] uppercase font-bold text-[#C5A059]">tm</sup>
+                            </h2>
+                        </div>
+                    </div>
+                    <p class="text-[9px] font-bold text-[#001b44]/60 uppercase tracking-widest">Financial Projection</p>
+                </div>
+
+                <div class="border border-slate-200 rounded-[1.5rem] p-8 mb-8 bg-white shadow-sm">
+                    <p class="text-xs font-black uppercase text-[#64748b] mb-6 text-center tracking-widest">5-Year Cumulative Savings Area (Legacy vs WaaS)</p>
+                    <div class="relative w-full h-[250px]">
+                        <canvas id="pdfChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-[#C5A059] p-6 rounded-2xl flex justify-between items-center mb-8 shadow-lg">
+                    <div>
+                        <p class="font-black uppercase tracking-widest text-[#001b44] text-sm">Projected 5-Year</p>
+                        <p class="font-bold uppercase tracking-widest text-[#001b44]/70 text-[10px]">Financial Impact</p>
+                    </div>
+                    <p id="pdf-5year" class="text-4xl font-black text-[#001b44]">Rp 0</p>
+                </div>
+                
+                <p class="text-justify text-[10px] text-[#001b44]/70 leading-relaxed italic px-4 border-l-2 border-[#001b44]/20">
+                    *Catatan: Proyeksi ini memvalidasi penghematan akumulatif selama 60 bulan operasional. Angka tarif WaaS Invila™ bersifat indikatif (default) dan akan disesuaikan secara presisi pasca audit teknis serta factory assessment.
+                </p>
+            </div>
+
+            <div class="flex justify-between items-end border-t-4 border-[#001b44] pt-6 mt-4">
+                <div class="flex items-center gap-4">
+                    <img src="QR Code Irfon Calculator Respond Zero Capex.png" alt="QR Code Strategic Room" class="w-[75px] h-[75px] object-contain p-1 bg-white border-2 border-[#001b44] rounded-lg">
+                    <div>
+                        <p class="text-[10px] font-black text-[#001b44] uppercase tracking-widest">Scan for Factory Audit</p>
+                        <p class="text-[9px] text-[#001b44]/70 font-bold uppercase mt-1">Direct to: Irfon Desman, SE. MBA.</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] font-bold text-[#001b44]/60 uppercase tracking-widest mb-1">Technical Engineering Validation:</p>
+                    <p class="text-[12px] font-black text-[#001b44] uppercase tracking-widest">Piator Simbolon</p>
+                    <p class="text-[9px] font-bold text-[#C5A059] uppercase tracking-widest">Water & Strategic Engineer</p>
+                    <p class="text-[8px] font-black text-[#001b44] uppercase tracking-[0.2em] mt-2">INVILA™ STRATEGIC ROOM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const faders = document.querySelectorAll('.fade-in-section');
+            const appearOptions = {
+                threshold: 0.02,
+                rootMargin: "0px 0px 0px 0px"
+            };
+
+            const appearOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    } else {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, appearOptions);
+
+            faders.forEach(fader => {
+                appearOnScroll.observe(fader);
+            });
+        });
+
+        const heroVideo = document.getElementById('heroVideo');
+        const heroImage = document.getElementById('heroImage');
+        const contentOverlay = document.getElementById('contentOverlay');
+        const odometer = document.getElementById('odometer');
+        
+        // Logika fade in untuk teks KIW1
+        const proofVideo = document.getElementById('proofVideo');
+        const proofText = document.getElementById('proofText');
+        let proofTriggered = false;
+
+        function animateOdo(start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                odometer.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString('id-ID');
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function reveal(isInstant = false) {
+            if (!contentOverlay.classList.contains('hidden')) return;
+            if (isInstant) {
+                heroVideo.classList.add('hidden-element');
+                heroImage.classList.remove('hidden');
+                heroImage.classList.add('visible');
+                contentOverlay.classList.remove('hidden');
+                contentOverlay.style.opacity = "1";
+                animateOdo(79150000, 79154776, 500);
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('skipvideo') === 'true') {
+                    setTimeout(() => document.getElementById('ebitda-anchor').scrollIntoView(), 600);
+                }
+            } else {
+                heroVideo.style.transition = "opacity 0.8s ease";
+                heroVideo.style.opacity = "0";
+                setTimeout(() => {
+                    heroVideo.classList.add('hidden-element');
+                    heroImage.classList.remove('hidden');
+                    heroImage.classList.add('fade-in');
+                    setTimeout(() => heroImage.classList.add('visible'), 50);
+                    contentOverlay.classList.remove('hidden');
+                    setTimeout(() => {
+                        contentOverlay.style.opacity = "1";
+                        animateOdo(79150000, 79154776, 2000);
+                    }, 100);
+                }, 800);
+            }
+            sessionStorage.setItem('vWatched', 'true');
+        }
+
+        let chartInstance = null;
+
+        function fmt(n) {
+            if (n >= 1e9) return 'Rp ' + (n / 1e9).toFixed(2) + ' Miliar';
+            if (n >= 1e6) return 'Rp ' + (n / 1e6).toFixed(1) + ' Juta';
+            return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+        }
+
+        function fmtNum(n) {
+            return new Intl.NumberFormat('id-ID').format(n);
+        }
+
+        function updateCalculations() {
+            const v = parseFloat(document.getElementById('flow').value) || 0;
+            const l = parseFloat(document.getElementById('legacy').value) || 0;
+            const t = parseFloat(document.getElementById('tariff').value) || 0;
+
+            const annualSaving = (l - t) * v * 365;
+            const fiveYearSaving = annualSaving * 5;
+            const capex = (v / 86.4) * 250000000;
+
+            document.getElementById('dash-5year').innerText = fmt(fiveYearSaving);
+            document.getElementById('dash-capex').innerText = fmt(capex);
+            document.getElementById('dash-annual').innerText = fmt(annualSaving);
+
+            document.getElementById('pdf-flow').innerText = fmtNum(v) + " m³";
+            document.getElementById('pdf-legacy').innerText = "Rp " + fmtNum(l);
+            document.getElementById('pdf-tariff').innerText = "Rp " + fmtNum(t);
+            document.getElementById('tbl-legacy').innerText = "Rp " + fmtNum(l) + " / m³";
+            document.getElementById('tbl-tariff').innerText = "Rp " + fmtNum(t) + " / m³";
+            document.getElementById('tbl-gain').innerText = "+ " + fmt(annualSaving) + " / thn";
+            document.getElementById('pdf-capex').innerText = fmt(capex);
+            document.getElementById('pdf-annual').innerText = fmt(annualSaving);
+            document.getElementById('pdf-5year').innerText = fmt(fiveYearSaving);
+
+            updateChart(v, l, t);
+        }
+
+        function updateChart(v, l, t) {
+            const labels = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
+            const legacyData = [1, 2, 3, 4, 5].map(y => v * 365 * y * l);
+            const waasData = [1, 2, 3, 4, 5].map(y => v * 365 * y * t);
+
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('pdfChart').getContext('2d');
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            label: 'LEGACY COST', 
+                            data: legacyData, 
+                            borderColor: '#e11d48', 
+                            borderWidth: 3, 
+                            pointRadius: 0, 
+                            tension: 0 
+                        },
+                        { 
+                            label: 'INVILA WAAS', 
+                            data: waasData, 
+                            borderColor: '#001b44', 
+                            backgroundColor: '#f9f8f4', 
+                            fill: true, 
+                            borderWidth: 4, 
+                            pointRadius: 0,
+                            tension: 0 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'rect', boxWidth: 16, boxHeight: 16, font: { size: 10, family: 'Inter', weight: 'bold' }, color: '#001b44', padding: 25 } } 
+                    },
+                    scales: { 
+                        y: { beginAtZero: true, ticks: { font: { size: 10, family: 'Inter' }, color: '#94a3b8', callback: val => 'Rp' + (val/1e9) + 'B' }, grid: { color: '#f1f5f9', drawBorder: false } },
+                        x: { ticks: { font: { size: 11, family: 'Inter' }, color: '#94a3b8' }, grid: { color: '#f1f5f9', drawBorder: false } }
+                    }
+                }
+            });
+        }
+
+        async function generateStrategicPDF() {
+            const btn = document.getElementById('btn-pdf');
+            const originalText = btn.innerText;
+            btn.innerText = "Processing Document...";
+            btn.classList.add("opacity-70", "cursor-wait");
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; 
+                const imgHeight = 297;
+
+                const canvas1 = await html2canvas(document.getElementById('pdf-page-1'), { scale: 3, useCORS: true });
+                doc.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+
+                doc.addPage();
+                const canvas2 = await html2canvas(document.getElementById('pdf-page-2'), { scale: 3, useCORS: true });
+                doc.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                doc.save(`001_INVILA_STRATEGIC_RECOVERY_REPORT_2026.pdf`);
+            } catch (error) {
+                console.error("PDF Error: ", error);
+                alert("Terjadi kesalahan sistem saat membuat PDF.");
+            } finally {
+                btn.innerText = originalText;
+                btn.classList.remove("opacity-70", "cursor-wait");
+            }
+        }
+
+        window.onload = () => {
+            const watched = sessionStorage.getItem('vWatched') || new URLSearchParams(window.location.search).get('skipvideo');
+            if (watched === 'true') { reveal(true); } 
+            else {
+                const playPromise = heroVideo.play();
+                if (playPromise !== undefined) { playPromise.catch(() => reveal(true)); }
+                heroVideo.onended = () => reveal(false);
+                setTimeout(() => { if (contentOverlay.classList.contains('hidden')) reveal(true); }, 6000);
+            }
+            
+            // Event listener khusus untuk video proof KIW1
+            if(proofVideo && proofText) {
+                proofVideo.addEventListener('timeupdate', () => {
+                    if (proofVideo.currentTime >= 15 && !proofTriggered) {
+                        proofTriggered = true;
+                        proofText.style.opacity = "1";
+                    }
+                });
+            }
+            
+            updateCalculations();
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId.startsWith('#')) {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(targetId);
+                        if(targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        };
+    </script>
+</body>
+</html>
