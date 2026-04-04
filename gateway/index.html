@@ -20,8 +20,8 @@
     <div class="war-room-bg flex flex-col">
         <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-lg">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] text-glow">I</div>
-                <span class="text-xl font-black tracking-tighter text-white uppercase">INVILA<span class="text-blue-500">™</span></span>
+                <img src="../logo-invila-white.png" alt="Invila Logo" class="h-8 md:h-10 object-contain opacity-90"> 
+                <span class="text-xl font-black tracking-tighter text-white uppercase ml-2 border-l border-slate-700 pl-3">INVILA<span class="text-blue-500">™</span></span>
             </div>
             <div class="hidden md:block text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase text-glow">Secure Strategic Gateway v5.0</div>
         </nav>
@@ -42,7 +42,7 @@
                     <div class="video-container rounded-3xl bg-black mb-6">
                         <div class="video-overlay"></div>
                         <video id="main-player" autoplay muted loop playsinline class="w-full h-auto opacity-80 grayscale-[10%]">
-                            <source src="KIW%201.mp4" type="video/mp4">
+                            <source src="KIW 1.mp4" type="video/mp4">
                         </video>
                         <div class="absolute bottom-5 left-6 z-20 flex items-center gap-3">
                             <div class="px-3 py-1.5 bg-black/70 backdrop-blur-md rounded border border-slate-600 text-[10px] font-mono text-blue-300 tracking-widest shadow-lg">
@@ -88,7 +88,16 @@
                 </div>
             </div>
         </main>
-        <footer class="p-8 text-center text-slate-600 text-[10px] font-bold tracking-[0.4em] uppercase border-t border-slate-900 mt-auto bg-slate-950/50">© 2026 INVILA WATER INFRASTRUCTURE | SECURE INTERFACE</footer>
+        
+        <footer class="p-8 text-center text-slate-600 text-[10px] font-bold tracking-[0.4em] uppercase border-t border-slate-900 mt-auto bg-slate-950/50 flex flex-col md:flex-row justify-center items-center gap-4">
+            <span>© 2026 INVILA WATER INFRASTRUCTURE | SECURE INTERFACE</span>
+            
+            <span class="hidden md:inline">|</span>
+            <span class="relative cursor-pointer group" onclick="navigator.clipboard.writeText('invilawatertreatment@gmail.com'); const msg = document.getElementById('copy-email-msg'); msg.classList.remove('opacity-0'); setTimeout(() => msg.classList.add('opacity-0'), 2000);">
+                <span class="hover:text-blue-400 transition-colors">Contact: invilawatertreatment@gmail.com</span>
+                <span id="copy-email-msg" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] font-bold tracking-widest px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none shadow-lg">COPIED!</span>
+            </span>
+        </footer>
     </div>
 
     <script>
@@ -143,7 +152,8 @@
         function forwardToCFO() {
             const params = new URLSearchParams(window.location.search);
             const comp = params.get('comp') || "Mitra Industri";
-            const cfoLink = `https://zerocapexwaterinfrastructure.com/gateway/?name=CFO&role=CFO&comp=${encodeURIComponent(comp)}`;
+            // PATH DIPERBAIKI: Mengarah ke domain utama (Master)
+            const cfoLink = `https://invilawatertreatment-blip.github.io/McKinsey-Pro/`; 
             const pesanWA = `Pak, saya mereview utilitas air 1.000 m³ kita. Terdeteksi risiko *biaya hanyut Rp2,2 Miliar/tahun* yang tersamar.\n\n` +
                             `Saya temukan solusi via skema *Invila™ WaaS*:\n` +
                             `1. *Zero Capex:* Tidak bebani budget.\n` +
@@ -156,7 +166,8 @@
         function forwardToFM() {
             const params = new URLSearchParams(window.location.search);
             const comp = params.get('comp') || "Mitra Industri";
-            const fmLink = `https://zerocapexwaterinfrastructure.com/gateway/?name=FM&role=FM&comp=${encodeURIComponent(comp)}`;
+            // PATH DIPERBAIKI: Mengarah ke sesama gateway
+            const fmLink = `https://invilawatertreatment-blip.github.io/McKinsey-Pro/gateway/index.html?name=FM&role=FM&comp=${encodeURIComponent(comp)}`;
             const pesanWA = `Selamat siang, Pak FM. Saya baru menelaah skema utilitas air dari *Invila™*. Ada potensi pemulihan EBITDA (savings) *Rp6,64 Miliar* per tahun dari penggunaan air 2.000 m³ kita.\n\n` +
                             `Skema ini *Zero CapEx* (investasi Rp5,79 Miliar ditanggung vendor). Saya butuh *validasi teknis Bapak* untuk pastikan sistem ini layak.\n\n` +
                             `Mohon evaluasi detail teknisnya di sini:\n${fmLink}\n\n` +
